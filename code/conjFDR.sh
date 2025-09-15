@@ -43,6 +43,21 @@ mv "/FDR/results/runme_"$IDP"_"$name"_cjfdr.m" /pleiofdr-master/ -f
 mv /FDR/results/ /pleiofdr-master/ -f
 done
 
+##------------------------------
+sigfile=/FDR/list.txt
+resultfile=/FDR/conjFDR/log
+pleiofile=/pleiofdr-master
+line_count=$(awk 'END{print NR}' "$sigfile")
+for i in $(seq 1 $line_count);do
+IDP=`cat $sigfile|awk 'NR=='$i' {print $1}'`
+disease=`cat $sigfile|awk 'NR=='$i' {print $2}'`
+name=$(echo "$disease" | awk -F'_' '{print $1}')
+
+cmd="args=\"addpath(genpath('$pleiofile/'));runme_"$IDP"_"$name"_cjfdr\"\n/gpfs/chenglan/share/app/imaging/matlab2016b/bin/matlab -nodesktop -nosplash -r \"\$args\""
+echo -e $cmd > "$resultfile/a"$IDP"_"$disease"_cfdr.sh"
+qsub -q clc2 -e "$resultfile/a"$IDP"_"$disease"_cfdr.err" -o "$resultfile/a"$IDP"_"$disease"_cfdr.out" "$resultfile/a"$IDP"_"$disease"_cfdr.sh"
+done
+
 
 ##------------------------------
 sigfile=/FDR/list.txt
